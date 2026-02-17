@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h3>Admin Dashboard</h3>
+    <div id="users"></div>
+    <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+async function loadUsers(){
+    const res = await fetch("/api/admin/users",{
+        headers:{ "Authorization":token }
+    });
+
+    const data = await res.json();
+
+    let output="";
+    data.forEach(u=>{
+        output += `<div class="card p-2 mb-2">
+            ${u.name} (${u.role}) - ${u.status ? "Active":"Blocked"}
+            <button onclick="toggle(${u.id})" class="btn btn-sm btn-warning">Toggle</button>
+        </div>`;
+    });
+
+    users.innerHTML=output;
+}
+
+async function toggle(id){
+    await fetch("/api/admin/toggle-user/"+id,{
+        method:"PUT",
+        headers:{ "Authorization":token }
+    });
+    loadUsers();
+}
+
+function logout(){
+    localStorage.clear();
+    location="login.html";
+}
+
+loadUsers();
+</script>
+
+</body>
+</html>
